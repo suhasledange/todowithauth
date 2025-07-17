@@ -19,31 +19,22 @@ export const signup = async (req,res)=>{
         if(existingUser){
             return res.status(409).json({
                 success:false,
-                message:"An account with this email alreadu exists"
+                message:"An account with this email already exists"
             })
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password,salt)
 
-        const newUser = await User.create({
+        await User.create({
             fullName,
             email,
             password:hashedPassword
         })
 
-        const token = generateToken(newUser._id);
-
         res.status(201).json({
             success:true,
             message:"Account created successfully",
-            userData:{
-                _id:newUser._id,
-                fullName:newUser.fullName,
-                email:newUser.email,
-                createdAt:newUser.createdAt
-            },
-            token
         });
 
     } catch (error) {
@@ -70,34 +61,31 @@ export const login = async (req,res)=>{
 
         const user = await User.findOne({email});
 
-        if(!user){
-            return res.status(400).json({
-                success:false,
-                message:"Invalid credentials"
-            })
-        }
-
-        const isMatch = await bcrypt.compare(password,user.password);
-
-        if(!isMatch){
+        if(!user || !(await bcrypt.compare(password,user.password))){
             return res.status(401).json({
                 success:false,
                 message:"Invalid credentials"
             })
         }
 
+
         const token = generateToken(user._id);
+
+        res.cookie("token",token,{
+            httpOnly:true,
+            secure:false,
+            sameSite:"Strict",
+            maxAge:24*60*60*1000,
+        })
 
         res.status(200).json({
             success:true,
-            message:"Logged in successfully",
-           userData:{
-                _id:user._id,
+            message:"Logged in successfully", 
+            userData:{
+                id:user._id,
                 fullName:user.fullName,
-                email:user.email,
-                createdAt:user.createdAt
-            },
-            token
+                email:user.email
+            }          
         })
 
     } catch (error) {
@@ -107,6 +95,14 @@ export const login = async (req,res)=>{
             message:"An internal server error occured"
         })
     }
+}
+
+export const logout = (req,res)=>{
+    res.clearCookie("token");
+    res.json({
+        success:true,
+        message:"Logged out successfully"
+    })
 }
 
 export const checkAuth = (req, res) => {
