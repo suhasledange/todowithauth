@@ -108,3 +108,18 @@ export const login = async (req,res)=>{
         })
     }
 }
+
+export const checkAuth = (req, res) => {
+  if (req.user) {
+    return res.status(200).json({
+      success: true,
+      message: "User is authenticated",
+      user: req.user,
+    });
+  }
+
+  return res.status(401).json({
+    success: false,
+    message: "Not authenticated",
+  });
+};

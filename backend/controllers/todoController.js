@@ -8,7 +8,7 @@ export const createTodo = async (req,res)=>{
     try {
 
         const newTodo = await Todo.create({
-            userId:req.user.id,
+            userId:req.user._id,
             title
         })
 

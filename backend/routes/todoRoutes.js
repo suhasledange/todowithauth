@@ -1,10 +1,10 @@
 import express from 'express'
-import authMiddleware from '../middlewares/authMiddleware.js'
 import { createTodo } from '../controllers/todoController.js'
+import protectRoute from '../middlewares/protectRoute.js'
 
 const todoRouter = express.Router()
 
-todoRouter.get('/createTodo',authMiddleware,createTodo)
+todoRouter.get('/createTodo',protectRoute,createTodo)
 
 
 export default todoRouter
