@@ -1,10 +1,13 @@
 import express from 'express'
-import { createTodo } from '../controllers/todoController.js'
+import { createTodo, deleteTodo, getTodos, updateTodo } from '../controllers/todoController.js'
 import protectRoute from '../middlewares/protectRoute.js'
 
 const todoRouter = express.Router()
 
-todoRouter.get('/createTodo',protectRoute,createTodo)
+todoRouter.post('/createTodo',protectRoute,createTodo)
+todoRouter.get('/getTodos',protectRoute,getTodos)
+todoRouter.put('/updateTodo/:id',protectRoute,updateTodo)
+todoRouter.delete('/deleteTodo/:id',protectRoute,deleteTodo)
 
 
 export default todoRouter
