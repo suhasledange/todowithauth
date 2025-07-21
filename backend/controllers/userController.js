@@ -32,14 +32,14 @@ export const signup = async (req,res)=>{
             password:hashedPassword
         })
 
-        res.status(201).json({
+       return res.status(201).json({
             success:true,
             message:"Account created successfully",
         });
 
     } catch (error) {
         console.error("Signup Error:",error);
-        res.status(500).json({
+       return res.status(500).json({
             success:false,
             message:"An internal server error occured"
         })
@@ -78,7 +78,7 @@ export const login = async (req,res)=>{
             maxAge:24*60*60*1000,
         })
 
-        res.status(200).json({
+       return res.status(200).json({
             success:true,
             message:"Logged in successfully", 
             userData:{
@@ -90,7 +90,7 @@ export const login = async (req,res)=>{
 
     } catch (error) {
         console.error("Error in login :",error);
-        res.status(500).json({
+       return res.status(500).json({
             success:false,
             message:"An internal server error occured"
         })
@@ -99,7 +99,7 @@ export const login = async (req,res)=>{
 
 export const logout = (req,res)=>{
     res.clearCookie("token");
-    res.json({
+    return res.json({
         success:true,
         message:"Logged out successfully"
     })

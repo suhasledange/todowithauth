@@ -21,12 +21,12 @@ const Login = () => {
     }
 
     return (
-    <form onSubmit={handleSubmit} className='space-y-4' >
+    <form onSubmit={handleSubmit} className='space-y-4 text-black' >
         <input
             autoComplete='email'
             type='email'
             placeholder='Enter your email'
-            className='w-full p-2 border'
+            className='w-full p-2 border '
             value={formData.email}
             name="email"
             onChange={(e)=>setFormData({...formData,email:e.target.value})}

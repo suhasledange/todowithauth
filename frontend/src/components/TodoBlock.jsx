@@ -5,11 +5,15 @@ const TodoBlock = ({todos,loading,setLoading,fetchTodos}) => {
   const [title,setTitle] = useState("")
   const [adding,setAdding] = useState(false)
 
+  const [editingId, setEditingId] = useState(null); // which todo is being edited
+  const [editTitle, setEditTitle] = useState(""); // value of the editing input
+
   const handleCreate = async(e)=>{
     e.preventDefault();  
     if(!title.trim()) return;
 
       try {
+        setAdding(true)
           const res = await axios.post("/todo/createTodo",{title});
           if(res){
               fetchTodos();
@@ -18,11 +22,31 @@ const TodoBlock = ({todos,loading,setLoading,fetchTodos}) => {
 
       } catch (error) {
         console.error("Error creating todos",error)
+      }finally{
+        setAdding(false)
       }
   }
 
+    const startEditing = (todo) => {
+    setEditingId(todo._id);
+    setEditTitle(todo.title);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditTitle("");
+  };
+
   const handleUpdate = async(id)=>{
-        
+        if(!editTitle.trim()) return;
+
+        try {
+          const res = await axios.put(`/todo/updateTodo/${id}`,{title:editTitle})
+          if(res) fetchTodos()
+          cancelEdit()
+        } catch (error) {
+          console.error("Error updating todo", error);
+        }
   }
 
   const handleDelete = async (id) =>{
@@ -58,35 +82,61 @@ const TodoBlock = ({todos,loading,setLoading,fetchTodos}) => {
             > {adding ? "creating..." : "create"} </button>
           </form>
 
-      <div>
-        {
-          loading ? (
+     <div className='bg-gray-300 px-3 py-1 flex items-center justify-center'>
+          {loading ? (
             <p>Loading Todos...</p>
           ) : todos.length === 0 ? (
             <p>No Todos found. Add one above</p>
           ) : (
             <ul>
-                {
-                  todos.map(todo => (
-                      <li key={todo._id}
-                          className='flex mb-3 justify-between items-center'
+              {todos.map(todo => (
+                <li key={todo._id} className='flex mb-3 justify-between items-center gap-3 text-black'>
+                  {editingId === todo._id ? (
+                    <>
+                      <input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="flex-1 p-1 bg-transparent border-b-2 border-gray-600 rounded"
+                      />
+                      <button
+                        className='bg-green-500 cursor-pointer text-white px-3 py-1 rounded'
+                        onClick={() => handleUpdate(todo._id)}
                       >
-                        <span>{todo.title}</span>
-                        
-                        <div className='flex items-center justify-center gap-3'>
-                          <button className='bg-blue-500 px-4 py-1 cursor-pointer' onClick={()=>handleUpdate(todo._id)}>update</button>
-                        <button className='bg-red-500 px-4 py-1 cursor-pointer' onClick={()=>handleDelete(todo._id)}>delete</button>
-                        </div>
-                      
-                      </li>
-                  ))
-                }
+                        Save
+                      </button>
+                      <button
+                        className='bg-gray-400 cursor-pointer text-white px-3 py-1 rounded'
+                        onClick={cancelEdit}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        value={todo.title}
+                        readOnly
+                        className="flex-1 p-1 border-none bg-transparent rounded"
+                      />
+                      <button
+                        className='bg-blue-500 cursor-pointer text-white px-4 py-1 rounded'
+                        onClick={() => startEditing(todo)}
+                      >
+                        Update
+                      </button>
+                      <button
+                        className='bg-red-500 cursor-pointer text-white px-4 py-1 rounded'
+                        onClick={() => handleDelete(todo._id)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </li>
+              ))}
             </ul>
-          )
-        }
-
-      </div>
-
+          )}
+        </div>
         </div>
     </div>
   )
